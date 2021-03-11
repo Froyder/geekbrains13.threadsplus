@@ -8,8 +8,10 @@ public class MainClass {
 
     public static final int CARS_COUNT = 4;
     public static final int SPLIT_CARS_COUNT = CARS_COUNT / 2;
+    
     public static void main(String[] args) throws BrokenBarrierException, InterruptedException {
-
+        
+        ExecutorService executor = Executors.newFixedThreadPool(CARS_COUNT);
         System.out.println("ВАЖНОЕ ОБЪЯВЛЕНИЕ >>> Подготовка!!!");
         Race race = new Race(new Road(60), new Tunnel(80), new Road(40));
         Car[] cars = new Car[CARS_COUNT];
@@ -17,11 +19,7 @@ public class MainClass {
         CountDownLatch finishLine = new CountDownLatch(CARS_COUNT);
 
         for (int i = 0; i < cars.length; i++) {
-            cars[i] = new Car(race, 20 + (int) (Math.random() * 10), startBarrier, finishLine);
-        }
-
-        for (Car car : cars) {
-            new Thread(car).start();
+            executor.execute(cars[i] = new Car(race, 20 + (int) (Math.random() * 10), startBarrier, finishLine));
         }
 
         startBarrier.await();
@@ -29,6 +27,7 @@ public class MainClass {
 
         finishLine.await();
         System.out.println("ВАЖНОЕ ОБЪЯВЛЕНИЕ >>> Гонка звершена!!!");
+        executor.shutdown();
 
     }
 }
